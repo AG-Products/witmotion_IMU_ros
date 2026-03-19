@@ -1,7 +1,7 @@
 witmotion:
   ros__parameters:
     port: ttyUSB0
-    baud_rate: 115200 # baud
+    baud_rate: 230400 # baud
     polling_interval: 5 # ms
     timeout_ms: 150 # ms
     restart_service_name: /restart_imu
