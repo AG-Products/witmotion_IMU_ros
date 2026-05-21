@@ -1,8 +1,8 @@
 witmotion:
   ros__parameters:
-    port: ttyUSB0
-    baud_rate: 115200 # baud
-    polling_interval: 5 # ms
+    port: /dev/ttyUSB0
+    baud_rate: 230400 # baud
+    polling_interval: 1 # ms
     timeout_ms: 150 # ms
     restart_service_name: /restart_imu
     imu_publisher:
@@ -28,13 +28,23 @@ witmotion:
       coefficient: 1.0 # Linear calibration parameters: coefficient
       addition: 0.0 # and addendum
     magnetometer_publisher:
-      enabled: true
+      enabled: false
       topic_name: /magnetometer
       frame_id: compass
       coefficient: 0.00000001 # Linear calibration parameters: coefficient
       addition: 0.0 # and addendum
       covariance:
-        [0.000000187123, 0.0, 0.0, 0.0, 0.000000105373, 0.0, 0.0, 0.0, 0.000000165816]
+        [
+          0.000000187123,
+          0.0,
+          0.0,
+          0.0,
+          0.000000105373,
+          0.0,
+          0.0,
+          0.0,
+          0.000000165816,
+        ]
     barometer_publisher:
       enabled: false
       topic_name: /barometer
