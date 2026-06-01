@@ -17,7 +17,9 @@ def generate_launch_description():
         name='witmotion_ros_node',
         package = 'witmotion_ros',
         executable = 'witmotion_ros_node',
-        parameters = [config]
+        parameters = [config],
+        respawn=True,
+        respawn_delay=2.0
     )
 
     ld.add_action(node)
