@@ -14,6 +14,7 @@ def generate_launch_description():
         )
         
     node=Node(
+        name = 'witmotion_ros_node', # to match with watchdog restart stuff, must be the same as "executable"
         package = 'witmotion_ros',
         executable = 'witmotion_ros_node',
         parameters = [config]

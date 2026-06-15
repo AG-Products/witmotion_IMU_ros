@@ -1,8 +1,8 @@
-witmotion:
+witmotion_ros_node:
   ros__parameters:
     port: /dev/ttyUSB0
     baud_rate: 230400 # baud
-    polling_interval: 1 # ms
+    polling_interval: 3 # ms
     timeout_ms: 150 # ms
     restart_service_name: /restart_imu
     imu_publisher:
