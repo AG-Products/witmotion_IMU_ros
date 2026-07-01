@@ -1,0 +1,69 @@
+name: CI
+
+# Managed by AG-Products/notion-cicd — do not edit by hand; run scripts/rollout.sh
+on:
+  push:
+    branches: [main, master, ros2, chris_trike_updates]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AG_BUILD_PROFILE: ros2-workspace
+  AG_ROS_PACKAGE: 
+  AG_ROS_DISTRO: humble
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      conclusion: ${{ steps.outcome.outputs.conclusion }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        id: build
+        run: bash .github/scripts/ci_build.sh
+
+      - name: Capture job outcome
+        id: outcome
+        if: always()
+        run: echo "conclusion=${{ steps.build.outcome }}" >> "$GITHUB_OUTPUT"
+
+  notion-sync:
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync CI run to Notion
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_CICD_RUNS_DB_ID: ${{ secrets.NOTION_CICD_RUNS_DB_ID }}
+          CI_CONCLUSION: ${{ needs.build.outputs.conclusion }}
+          JOB_TYPE: CI
+          DEPLOY_ENVIRONMENT: staging
+          CI_RUN_NAME: ${{ github.workflow }} — ${{ github.repository }} — ${{ github.ref_name }}
+        run: python3 .github/scripts/notion_sync.py ci
+
+      - name: Sync pull request to Notion
+        if: github.event_name == 'pull_request'
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_PR_DB_ID: ${{ secrets.NOTION_PR_DB_ID }}
+          NOTION_EPIC_PAGE_ID: ${{ secrets.NOTION_EPIC_PAGE_ID }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          PR_BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          PR_CREATED_AT: ${{ github.event.pull_request.created_at }}
+          PR_MERGED_AT: ${{ github.event.pull_request.merged_at }}
+          GITHUB_EVENT_ACTION: ${{ github.event.action }}
+          PR_CI_STATUS: ${{ needs.build.outputs.conclusion }}
+        run: python3 .github/scripts/notion_sync.py pr

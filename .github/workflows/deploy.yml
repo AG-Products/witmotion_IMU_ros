@@ -1,0 +1,40 @@
+name: Deploy
+
+# Managed by AG-Products/notion-cicd — do not edit by hand; run scripts/rollout.sh
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment environment
+        required: true
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
+      version:
+        description: Version or tag to deploy
+        required: false
+        default: latest
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Record deployment in Notion
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DEPLOYMENTS_DB_ID: ${{ secrets.NOTION_DEPLOYMENTS_DB_ID }}
+          NOTION_PROJECT_PAGE_ID: ${{ secrets.NOTION_PROJECT_PAGE_ID }}
+          NOTION_REPO_PAGE_ID: ${{ secrets.NOTION_REPO_PAGE_ID }}
+          DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+          DEPLOY_VERSION: ${{ inputs.version }}
+          DEPLOY_STATUS: Completed
+          DEPLOY_RELEASE_NOTES: Manual deploy from ${{ github.ref_name }} at ${{ github.sha }}
+        run: python3 .github/scripts/notion_sync.py deploy
